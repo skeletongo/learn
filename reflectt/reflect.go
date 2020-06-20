@@ -3,60 +3,66 @@ package main
 import (
 	"fmt"
 	"reflect"
-	"strings"
+	"unsafe"
 )
 
-type Address struct {
-	City string
-	Area string
+type InnerType struct {
+	//Bool        bool
+	//Int         int
+	//Int8        int8
+	//Int16       int16
+	//Int32       int32
+	//Int64       int64
+	//Uint        uint
+	//Uint8       uint8
+	//Uint16      uint16
+	//Uint32      uint32
+	//Uint64      uint64
+	//Uintptr     uintptr
+	//Float32     float32
+	//Float64     float64
+	//Complex64   complex64
+	//Complex128  complex128
+	Func        func()
+	Chan        chan int
+	Ptr         *int
+	Struct      Student
+	Array       [2]int
+	Slice       []int
+	Interface   Person
+	Map         map[string]interface{}
+	String      string
+	UnsafePoint unsafe.Pointer
 }
 
 type Student struct {
-	Address
-	Name string
-	Age  int
 }
 
-func (this Student) Say() {
-	fmt.Println("hello, i am ", this.Name, "and i am ", this.Age)
+func (s *Student) Speak(str string) {
+	fmt.Println(str)
 }
 
-func (this Student) Hello(word string) {
-	fmt.Println("hello", word, ". i am ", this.Name)
+type Person interface {
+	Speak(string)
 }
 
 func main() {
-	var student = new(Student)
-	student.Name = "Tom"
-	student.Age = 18
-	fmt.Println(SturctInfo(*student))
+	testFunc()
 }
 
-// 获取结构体信息
-func SturctInfo(obj interface{}) string {
-	buf := strings.Builder{}
-	// 类型
-	t := reflect.TypeOf(obj)
-	buf.WriteString(fmt.Sprintln("type:",t.Name()))
-	if t.Kind() != reflect.Struct {
-		fmt.Println("this obj is not a struct, it is", t.Kind())
-		return ""
+func testFunc() {
+	data := InnerType{
+		Func: func() {
+			fmt.Println("hello world!")
+		},
 	}
-	v := reflect.ValueOf(obj)
-	// 字段信息
-	for i := 0; i < t.NumField(); i++ {
-		tt := t.Field(i)
-		vv := v.Field(i).Interface()
-		buf.WriteString(fmt.Sprintln(tt.Name, tt.Type, vv))
-		t1 := reflect.TypeOf(vv)
-		if t1.Kind() == reflect.Struct {
-			buf.WriteString(SturctInfo(vv))
-		}
-	}
-	// 方法信息
-	for i := 0; i < t.NumMethod(); i++ {
-		m := t.Method(i)
-		buf.WriteString(fmt.Sprintln(m.Name,m.Type))
-	}
-	return buf.String()
+	t := reflect.TypeOf(data.Func)
+	fmt.Println("Name()=", t.Name())
+	fmt.Println("Kind()=", t.Kind())
+	fmt.Println("String()=", t.String())
+	fmt.Println("Align()=", t.Align())
+	fmt.Println("Size()=", t.Size())
+	v := reflect.ValueOf(data.Func)
+	fmt.Println("Kind()=", v.Kind())
+	fmt.Println("String()=", v.String())
 }
